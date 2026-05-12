@@ -1,33 +1,31 @@
 package ui;
 
+import model.UserService;
+import model.User;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 public class Login {
 
+    private static UserService userService = new UserService();
+
     public static void loginFrame() {
-        // 创建主窗口
         JFrame loginBox = new JFrame("连连看 - 登录");
         loginBox.setSize(600, 450);
-        loginBox.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginBox.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         loginBox.setLayout(null);
-        // 窗口居中
         loginBox.setLocationRelativeTo(null);
-        // 设置背景色
-        loginBox.getContentPane().setBackground(new Color(240, 248, 255)); // AliceBlue
+        loginBox.getContentPane().setBackground(new Color(240, 248, 255));
 
-        // 标题
+        //标题
         JLabel welcomeText = new JLabel("欢迎来到连连看");
         welcomeText.setSize(400, 60);
         welcomeText.setLocation(100, 30);
         welcomeText.setFont(new Font("微软雅黑", Font.BOLD, 36));
-        welcomeText.setForeground(new Color(25, 25, 112)); // MidnightBlue
+        welcomeText.setForeground(new Color(25, 25, 112));
         welcomeText.setHorizontalAlignment(SwingConstants.CENTER);
         loginBox.add(welcomeText);
 
@@ -39,7 +37,7 @@ public class Login {
         subtitle.setHorizontalAlignment(SwingConstants.CENTER);
         loginBox.add(subtitle);
 
-        // 用户名标签和输入框
+        //用户名框
         JLabel userLabel = new JLabel("用户名：");
         userLabel.setFont(new Font("微软雅黑", Font.PLAIN, 18));
         userLabel.setSize(100, 30);
@@ -50,10 +48,10 @@ public class Login {
         userField.setFont(new Font("微软雅黑", Font.PLAIN, 16));
         userField.setSize(250, 35);
         userField.setLocation(230, 148);
-        userField.setBorder(BorderFactory.createLineBorder(new Color(100, 149, 237), 1)); // CornflowerBlue
+        userField.setBorder(BorderFactory.createLineBorder(new Color(100, 149, 237), 1));
         loginBox.add(userField);
 
-        // 密码标签和密码框（回显*）
+        //密码框
         JLabel passLabel = new JLabel("密　码：");
         passLabel.setFont(new Font("微软雅黑", Font.PLAIN, 18));
         passLabel.setSize(100, 30);
@@ -64,78 +62,93 @@ public class Login {
         passField.setFont(new Font("微软雅黑", Font.PLAIN, 16));
         passField.setSize(250, 35);
         passField.setLocation(230, 208);
-        passField.setEchoChar('*'); // 密码回显为*
+        passField.setEchoChar('*');
         passField.setBorder(BorderFactory.createLineBorder(new Color(100, 149, 237), 1));
         loginBox.add(passField);
 
-        // Login 按钮（暂不实现具体登录逻辑）
+        // 登录按钮
         JButton lgButton = new JButton("登录");
-        styleButton(lgButton, new Color(70, 130, 180)); // SteelBlue
-        lgButton.setSize(130, 45);
-        lgButton.setLocation(150, 300);
+        styleButton(lgButton, new Color(70, 130, 180));
+        lgButton.setSize(110, 45);
+        lgButton.setLocation(120, 300);
         loginBox.add(lgButton);
 
-        // Register 按钮
+        // 注册按钮
         JButton regButton = new JButton("注册");
-        styleButton(regButton, new Color(34, 139, 34)); // ForestGreen
-        regButton.setSize(130, 45);
-        regButton.setLocation(320, 300);
+        styleButton(regButton, new Color(34, 139, 34));
+        regButton.setSize(110, 45);
+        regButton.setLocation(245, 300);
         loginBox.add(regButton);
 
-        // 为注册按钮添加事件：将用户名和密码写入users.txt
-        regButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String username = userField.getText().trim();
-                String password = new String(passField.getPassword()).trim();
+        // 游客登录按钮
+        JButton gueButton = new JButton("游客登录");
+        styleButton(gueButton, new Color(180, 175, 70));
+        gueButton.setSize(110, 45);
+        gueButton.setLocation(370, 300);
+        loginBox.add(gueButton);
 
-                // 输入校验
-                if (username.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(loginBox,
-                            "用户名和密码不能为空！",
-                            "注册失败",
-                            JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                if (username.contains(",")) {
-                    JOptionPane.showMessageDialog(loginBox,
-                            "用户名不能包含逗号！",
-                            "注册失败",
-                            JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                // 写入文件（追加模式，格式：用户名,密码）
-                try (PrintWriter writer = new PrintWriter(new FileWriter("users.txt", true))) {
-                    writer.println(username + "," + password);
-                    JOptionPane.showMessageDialog(loginBox,
-                            "注册成功！欢迎 " + username,
-                            "注册",
-                            JOptionPane.INFORMATION_MESSAGE);
-                    // 清空输入框
-                    userField.setText("");
-                    passField.setText("");
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(loginBox,
-                            "文件写入失败：" + ex.getMessage(),
-                            "错误",
-                            JOptionPane.ERROR_MESSAGE);
-                }
+        //现在确定做什么
+        // 登录
+        lgButton.addActionListener(e -> {
+            String username = userField.getText().trim();
+            String password = new String(passField.getPassword()).trim();
+            if (username.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(loginBox, "用户名和密码不能为空！", "登录失败", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (userService.login(username, password)) {
+                JOptionPane.showMessageDialog(loginBox, "登录成功！欢迎 " + username);
+                loginBox.dispose(); // 关闭登录窗口，后续进入游戏
+                //这里的游戏设置标题、长、宽
+                GameFrame frame = new GameFrame("Connect+ 连连看", 1000, 1000);
+                frame.repaint();
+            } else {
+                JOptionPane.showMessageDialog(loginBox, "用户名或密码错误！", "登录失败", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // 登录按钮暂时给出提示（后续可扩展）
-        lgButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(loginBox,
-                    "登录功能请在此处实现",
-                    "提示",
-                    JOptionPane.INFORMATION_MESSAGE);
+        // 注册
+        regButton.addActionListener(e -> {
+            String username = userField.getText().trim();
+            String password = new String(passField.getPassword()).trim();
+            if (username.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(loginBox, "用户名或密码不能为空！", "注册失败", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (username.contains(",")) {
+                JOptionPane.showMessageDialog(loginBox, "用户名不能包含逗号！", "注册失败", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            boolean success = userService.register(username, password);
+            if (success) {
+                JOptionPane.showMessageDialog(loginBox, "注册成功！请登录", "注册", JOptionPane.INFORMATION_MESSAGE);
+                userField.setText("");
+                passField.setText("");
+            } else {
+                JOptionPane.showMessageDialog(loginBox, "用户名已存在，请更换！", "注册失败", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        // 游客登录
+        gueButton.addActionListener(e -> {
+            userService.loginAsGuest();
+            JOptionPane.showMessageDialog(loginBox, "以游客身份进入游戏");
+            loginBox.dispose(); // 关闭窗口，进入游戏
+
+            //现在进游戏，这里的游戏设置标题、长、宽
+            GameFrame frame = new GameFrame("Connect+ 连连看", 1000, 1000);
+            frame.repaint();
         });
 
         loginBox.setVisible(true);
     }
 
-    // 按钮样式统一设置
+    // 获取当前登录的用户给后端
+    public static User getCurrentUser() {
+        return userService.getCurrentUser();
+    }
+
+    // 按钮样式
     private static void styleButton(JButton button, Color bgColor) {
         button.setFont(new Font("微软雅黑", Font.BOLD, 16));
         button.setBackground(bgColor);
@@ -144,8 +157,7 @@ public class Login {
         button.setBorder(BorderFactory.createRaisedBevelBorder());
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
-
-    // 测试主方法（可删除）
+    //这个用来测试界面，到时候删了
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Login::loginFrame);
     }
@@ -196,4 +208,5 @@ public class Login {
 
 //    }
 //}
+
 
