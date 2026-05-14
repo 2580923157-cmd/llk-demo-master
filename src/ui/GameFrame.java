@@ -2,6 +2,7 @@ package ui;
 
 import model.Cell;
 import model.GameBoard;
+import model.GameState;
 import model.Position;
 
 import javax.swing.*;
@@ -13,6 +14,8 @@ public class GameFrame extends JFrame{
     String title;
     StatusPanel statusPanel;
     ControlPanel controlPanel;
+    BoardPanel boardPanel;
+
     public GameFrame(String title, int width, int height) {
         super(title);
         this.setResizable(false);
@@ -44,6 +47,26 @@ public class GameFrame extends JFrame{
         this.add(this.statusPanel);
         this.add(this.controlPanel);
         this.add(boardPanel);
+    }
+
+
+    // 存档接口
+    public GameState exportGameState() {
+        int score = statusPanel.getScore();
+        int h = statusPanel.getHours();
+        int m = statusPanel.getMinutes();
+        int s = statusPanel.getSeconds();
+        return new GameState(null, score, h, m, s);
+    }
+
+    //读档接口
+    public void loadGameState(GameState state) {
+        if (state == null) return;
+        statusPanel.setScore(state.getScore());
+        statusPanel.setHours(state.getHours());
+        statusPanel.setMinutes(state.getMinutes());
+        statusPanel.setSeconds(state.getSeconds());
+        statusPanel.updateLabels();
     }
 
 }
